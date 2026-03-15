@@ -7,10 +7,12 @@ class LogisticRegression:
         self.learning_rate=learning_rate
         self.n_iterations=n_iterations
 
-    def sigmoid(self,z):
+    @staticmethod
+    def sigmoid(z):
         return 1/(1+np.exp(-z))
     
-    def logisticloss(self,y,y_pred):
+    @staticmethod
+    def logisticloss(y,y_pred):
         y_pred = np.clip(y_pred, 1e-9, 1 - 1e-9) #Tto avoid prob 0 or 1
         return -np.mean(y * np.log(y_pred) + (1 - y) * np.log(1 - y_pred))
     
@@ -38,9 +40,10 @@ class LogisticRegressionL2(LogisticRegression):
         self.lambda_=lambda_
 
     def logisticloss(self,y,y_pred):
-        y_pred = np.clip(y_pred, 1e-9, 1 - 1e-9) #Tto avoid prob 0 or 1
-        return -np.mean(y * np.log(y_pred) + (1 - y) * np.log(1 - y_pred)) + self.lambda_ * np.sum(self.w**2)
-
+        basicloss=super().logisticloss(y,y_pred)
+        penality_L2=self.lambda_ * np.sum(self.w**2)
+        return basicloss + penality_L2
+    
     def fit(self, X,y):
         self.w=np.zeros(X.shape[1])
         self.b=0
@@ -56,3 +59,18 @@ class LogisticRegressionL2(LogisticRegression):
             self.b-=self.learning_rate*grad_b
 
 class LogisticRegressionmulticlass:
+    def __init__(self,learnin_rate=0.01,n_iterations=1000):
+        self.w=None
+        self.b=None
+        self.learning_rate=self.learning_rate
+        self.n_iterations=n_iterations
+
+    @staticmethod
+    def softmax(z):
+        return np.exp(z)/np.sum(np.exp(z))
+    
+    def crossentropyloss(y,y_pred):
+        return -np.sum(y*np.log(y_pred))
+
+    def fit(self,X,y):
+        
